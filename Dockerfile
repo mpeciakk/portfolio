@@ -1,24 +1,11 @@
-FROM node:20-alpine AS base
+FROM node:20 AS builder
 WORKDIR /app
-
-COPY package.json package-lock.json ./
-
-FROM base AS prod-deps
-RUN npm ci
-
-FROM base AS build-deps
+COPY package*.json ./
 RUN npm install
-
-FROM build-deps AS build
 COPY . .
 RUN npm run build
 
-FROM base AS runtime
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-
-ENV HOST=0.0.0.0
-ENV PORT=4321
-EXPOSE 4321
-
-CMD node ./dist/server/entry.mjs
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
