@@ -2,32 +2,44 @@ import { planets, type Planet } from "@/constants/planets.ts";
 import * as THREE from "three";
 
 export const planetMeshes: THREE.Mesh[] = [];
-let sun: THREE.Mesh;
+let blackHole: THREE.Mesh;
+let accretionDisk: THREE.Mesh;
 
 export function createSun(scene: THREE.Scene) {
-  const sunGeometry = new THREE.SphereGeometry(10, 8, 8);
-  const sunMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffff00,
-    transparent: true,
-    opacity: 0.8,
+  const blackHoleGeometry = new THREE.SphereGeometry(10, 8, 8);
+  const blackHoleMaterial = new THREE.MeshBasicMaterial({
+    color: 0x000000,
   });
-  sun = new THREE.Mesh(sunGeometry, sunMaterial);
-  sun.position.set(0, 0, 0);
-  scene.add(sun);
+  blackHole = new THREE.Mesh(blackHoleGeometry, blackHoleMaterial);
+  blackHole.position.set(0, 0, 0);
+  scene.add(blackHole);
 
-  const sunGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(12, 8, 8),
-    new THREE.MeshBasicMaterial({
-      color: 0xffff00,
-      transparent: true,
-      opacity: 0.2,
-    }),
+  const blackHoleGlowGeometry = new THREE.SphereGeometry(11, 8, 8);
+  const blackHoleGlowMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.015,
+  });
+  const blackHoleGlow = new THREE.Mesh(
+    blackHoleGlowGeometry,
+    blackHoleGlowMaterial,
   );
-  scene.add(sunGlow);
+  blackHoleGlow.position.set(0, 0, 0);
+  scene.add(blackHoleGlow);
+
+  const accretionDiskGeometry = new THREE.RingGeometry(20, 15, 8, 8);
+  const accretionDiskMaterial = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+  });
+  accretionDisk = new THREE.Mesh(accretionDiskGeometry, accretionDiskMaterial);
+  accretionDisk.position.set(0, 0, 0);
+  accretionDisk.rotation.x = Math.PI / 2;
+  scene.add(accretionDisk);
 }
 
 export function animateSun() {
-  sun.rotation.y += 0.0001;
+  blackHole.rotation.y += 0.001;
+  accretionDisk.rotation.z += 0.001;
 }
 
 export function createPlanets(scene: THREE.Scene) {

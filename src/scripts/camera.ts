@@ -1,4 +1,4 @@
-import type { Planet } from "@/constants/planets.ts";
+import { type Planet, planets } from "@/constants/planets.ts";
 import { planetMeshes } from "./planets.ts";
 import * as THREE from "three";
 
@@ -15,6 +15,9 @@ export const raycaster = new THREE.Raycaster();
 let cameraAnimation: number | null = null;
 let currentPlanet: Planet | null = null;
 let currentPlanetMesh: THREE.Mesh | null = null;
+
+let hoveredPlanet: Planet | null = null;
+
 const originalCameraPosition = new THREE.Vector3(20, 10, 50);
 const originalCameraRotation = new THREE.Euler(-0.3, 0, -0.2);
 
@@ -84,6 +87,11 @@ export function zoomIn(planet: Planet) {
 export function zoomOut() {
   if (cameraAnimation && !currentPlanet) {
     return;
+  }
+
+  const contentElement = document.querySelector(".planet-content");
+  if (contentElement) {
+    contentElement.classList.remove("visible");
   }
 
   const startTime = Date.now();
@@ -166,6 +174,22 @@ export function updateCamera() {
 }
 
 function onPlanetClick(event: MouseEvent) {
+  if (
+    event.target &&
+    event.target instanceof HTMLElement &&
+    event.target.classList.contains("holographic-card")
+  ) {
+    const planet = planets.find(
+      (p) => p.name === (event.target as HTMLElement).dataset.planetId,
+    );
+
+    if (planet) {
+      zoomIn(planet);
+    }
+
+    return;
+  }
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -174,10 +198,41 @@ function onPlanetClick(event: MouseEvent) {
 
   if (intersects.length > 0 && intersects[0]?.object.userData.planet) {
     const planet = intersects[0].object.userData.planet as Planet;
+
     zoomIn(planet);
   } else {
     zoomOut();
   }
 }
 
+function onPlanetHover(event: MouseEvent) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(planetMeshes);
+
+  if (intersects.length > 0 && intersects[0]?.object.userData.planet) {
+    const planet = intersects[0].object.userData.planet as Planet;
+    hoveredPlanet = planet;
+
+    const infoElement = document.getElementById(`info-${planet.name}`);
+
+    if (infoElement) {
+      infoElement.classList.remove("hidden");
+    }
+  } else {
+    if (!hoveredPlanet) {
+      return;
+    }
+
+    const infoElement = document.getElementById(`info-${hoveredPlanet.name}`);
+
+    if (infoElement) {
+      infoElement.classList.add("hidden");
+    }
+  }
+}
+
 window.addEventListener("click", onPlanetClick);
+window.addEventListener("mousemove", onPlanetHover);
