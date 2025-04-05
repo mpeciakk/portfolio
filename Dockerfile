@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 FROM base AS prod-deps
-RUN npm install --omit=dev
+RUN npm ci
 
 FROM base AS build-deps
 RUN npm install
