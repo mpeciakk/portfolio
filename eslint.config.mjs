@@ -128,6 +128,7 @@ export default tseslint.config(
           ],
         },
       ],
+      "sonarjs/pseudo-random": "off",
     },
   },
   {
